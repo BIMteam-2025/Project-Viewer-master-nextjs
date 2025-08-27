@@ -1,4 +1,4 @@
-# Firebase Studio
+# Project Viewer database
 
 This is a NextJS Projects that constain a proof of conscept for further development on a DesignInc projects manage,ment viewer.
 
