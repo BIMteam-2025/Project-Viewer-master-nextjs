@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardHeader,
@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 import { Users } from 'lucide-react';
 
 type RevitUser = {
@@ -32,6 +33,7 @@ type RevitUser = {
 export default function AllUsersPage() {
   const [users, setUsers] = useState<RevitUser[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
+  const [filters, setFilters] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -85,6 +87,23 @@ export default function AllUsersPage() {
     return () => unsubscribe();
   }, [toast]);
 
+    const handleFilterChange = (header: string, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [header]: value,
+    }));
+  };
+
+   const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      return Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        const userValue = user[key];
+        return String(userValue).toLowerCase().includes(value.toLowerCase());
+      });
+    });
+  }, [users, filters]);
+
   return (
     <>
       <MainNav />
@@ -111,7 +130,7 @@ export default function AllUsersPage() {
               <CardDescription>
                 {isLoading
                   ? 'Loading user data...'
-                  : `Showing ${users.length} users.`}
+                    : `Showing ${filteredUsers.length} of ${users.length} users.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -127,12 +146,22 @@ export default function AllUsersPage() {
                     <TableHeader>
                       <TableRow>
                         {headers.map((header) => (
-                          <TableHead key={header}>{header}</TableHead>
+                             <TableHead key={header} className="min-w-[180px]">
+                            <div className="flex flex-col gap-2">
+                                {header}
+                                <Input
+                                    placeholder={`Filter ${header}...`}
+                                    value={filters[header] || ''}
+                                    onChange={(e) => handleFilterChange(header, e.target.value)}
+                                    className="h-8"
+                                />
+                            </div>
+                          </TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map((user, index) => (
+                       {filteredUsers.map((user, index) => (
                         <TableRow key={user.id || index}>
                           {headers.map((header) => (
                             <TableCell key={header}>
@@ -141,6 +170,16 @@ export default function AllUsersPage() {
                           ))}
                         </TableRow>
                       ))}
+                        {filteredUsers.length === 0 && (
+                          <TableRow>
+                            <TableCell
+                              colSpan={headers.length}
+                              className="h-24 text-center text-muted-foreground"
+                            >
+                              No results found for your filter.
+                            </TableCell>
+                          </TableRow>
+                        )}
                     </TableBody>
                   </Table>
                 </div>
