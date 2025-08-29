@@ -53,6 +53,13 @@ export function MainNav() {
               <Link href="/add-project"><PlusCircle />Add Project</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname.startsWith('/all-users')}>
+              <Link href="/all-users"><Users />All Users</Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+       
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/settings')}>
               <Link href="/settings"><Settings />Settings</Link>
