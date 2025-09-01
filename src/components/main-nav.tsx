@@ -38,11 +38,11 @@ export function MainNav() {
                 <Link href="/data"><Database />Data Management</Link>
               </SidebarMenuButton>
           </SidebarMenuItem>
-           <SidebarMenuItem>
+           {/* <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith('/people-analytics')}>
                 <Link href="/people-analytics"><Users />People Analytics</Link>
               </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname.startsWith('/project-report')}>
               <Link href="/project-report"><ClipboardList />Project Report</Link>

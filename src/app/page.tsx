@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo, useEffect } from 'react';
 import type { Project } from '@/types';
@@ -97,34 +98,46 @@ export default function Home() {
 
   const { chartData, chartConfig } = useMemo(() => {
     if (projects.length < 1 || headers.length === 0) {
-      return { chartData: [], chartConfig: null };
+        return { chartData: [], chartConfig: null };
     }
+
+    const isMostlyNumeric = (key: string) => {
+        const numericCount = projects.reduce((acc, p) => acc + (typeof p[key] === 'number' ? 1 : 0), 0);
+        return numericCount / projects.length > 0.5;
+    };
+    
+    const isMostlyString = (key: string) => {
+        const stringCount = projects.reduce((acc, p) => acc + (typeof p[key] === 'string' && p[key] ? 1 : 0), 0);
+        return stringCount / projects.length > 0.5;
+    };
+
     let yKey: string | null = null;
     for (const header of headers) {
-        if (projects.some(p => typeof p[header] === 'number')) {
+        if (isMostlyNumeric(header)) {
             yKey = header;
             break;
         }
     }
+    
     let xKey: string | null = null;
     for (const header of headers) {
-        if (header !== yKey && projects.some(p => typeof p[header] === 'string' && p[header])) {
+        if (header !== yKey && isMostlyString(header)) {
             xKey = header;
             break;
         }
     }
 
     if (!xKey || !yKey) {
-      return { chartData: [], chartConfig: null };
+        return { chartData: [], chartConfig: null };
     }
 
     const data = projects
         .map(p => ({
-            name: String(p[xKey as string] || 'Unnamed').substring(0, 30),
-            value: typeof p[yKey as string] === 'number' ? p[yKey as string] : 0,
+            name: String(p[xKey!] || 'Unnamed').substring(0, 30),
+            value: typeof p[yKey!] === 'number' ? p[yKey!] as number : 0,
         }))
         .filter(item => item.value > 0)
-        .sort((a, b) => (b.value as number) - (a.value as number))
+        .sort((a, b) => b.value - a.value)
         .slice(0, 12);
     
     if (data.length === 0) {
@@ -138,8 +151,12 @@ export default function Home() {
         },
     } as ChartConfigType;
     
+    data.forEach(item => {
+      config[item.name] = { label: item.name };
+    });
+
     return { chartData: data, chartConfig: config };
-  }, [projects, headers]);
+}, [projects, headers]);
 
   
   const categoryChart = useMemo(() => {
